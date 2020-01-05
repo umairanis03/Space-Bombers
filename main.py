@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+from pygame import mixer
 
 # Initializing pygame
 
@@ -20,6 +21,8 @@ playerImg = pygame.image.load('player.png')
 playerX = 370
 playerY = 480
 
+mixer.music.load('background.wav')
+mixer.music.play(-1)
 enemyImg = []
 enemyX = []
 enemyY = []
@@ -57,6 +60,7 @@ score_value = 0
 textX = 10
 textY = 10
 font = pygame.font.Font('freesansbold.ttf', 32)
+font2 = pygame.font.Font('freesansbold.ttf', 64)
 
 
 def showScore(x, y):
@@ -83,6 +87,13 @@ def fireBullet(x, y):
 playerX_change = 0
 
 running = True
+
+
+def game_over_text():
+    over_text = font2.render("Game Over ", True, (255, 255, 255))
+    screen.blit(over_text, (250, 250))
+
+
 while running:
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
@@ -96,6 +107,8 @@ while running:
             if event.key == pygame.K_RIGHT:
                 playerX_change = 5
             if event.key == pygame.K_SPACE:
+                bullet_sound = mixer.Sound('laser.wav')
+                bullet_sound.play()
                 fireBullet(playerX, playerY)
 
         if event.type == pygame.KEYUP:
@@ -121,6 +134,8 @@ while running:
             enemyY[i] += 40
         collision = iscollision(enemyX[i], enemyY[i], temp, bulletY)
         if collision:
+            collision_sound = mixer.Sound('explosion.wav')
+            collision_sound.play()
             bullet_state = "ready"
             bulletY = 480
             score_value += 1
@@ -135,6 +150,12 @@ while running:
         fireBullet(temp, bulletY)
         bulletY -= bulletY_change
 
+    for i in range(0, num_enemies):
+        if enemyY[i] > 450:
+            for j in range(num_enemies):
+                enemyY[j] = 2000
+            game_over_text()
+            break
     player(playerX, playerY)
     showScore(textX, textY)
     pygame.display.update()
